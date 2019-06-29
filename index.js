@@ -20,8 +20,15 @@ io.on('connection', function (socket) {
   socket.join('all');
   socket.on('msg', function (msg) {
     console.log(msg);
+    const dataOptions = {
+      timezone: 'UTC',
+      hour: 'numeric',
+      minute: 'numeric',
+      second: 'numeric'
+    };
+
     const obj = {
-      date: new Date(),
+      date: new Date().toLocaleString("ru", dataOptions),
       content: msg.message,
       userId: socket.id,
       userName: msg.name
