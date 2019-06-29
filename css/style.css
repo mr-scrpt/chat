@@ -55,7 +55,6 @@ body {
 }
 
 .users__block_members {
-  display: none;
   margin-left: 15px;
   margin-top: 45px;
   font-size: 14px;
@@ -280,4 +279,7 @@ body {
   display: block;
   max-height: 500px;
   overflow: hidden;
+}
+.hidden{
+  display: none;
 }

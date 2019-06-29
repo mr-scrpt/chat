@@ -14,18 +14,21 @@ app.get('/', function (req, res) {
 });
 
 io.on('connection', function (socket) {
-  
-  socket.emit('connected', 'a user connected')
 
-  socket.join('all')
+  socket.emit('connected', 'a user connected');
+
+  socket.join('all');
   socket.on('msg', function (msg) {
+    console.log(msg);
     const obj = {
       date: new Date(),
-      content: msg,
-      username: socket.id
-    }
-    socket.emit('message', obj)
-    socket.to('all').emit('message', obj)
+      content: msg.message,
+      userId: socket.id,
+      userName: msg.name
+    };
+    console.log(obj);
+    socket.emit('message', obj);
+    socket.to('all').emit('message', obj);
   });
   socket.on('receiveHistory', ()=>{
     //localStorage

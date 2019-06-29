@@ -38,14 +38,14 @@
         </div>
       </div>
     </div>
-    <!-- <div class="authorization__modal" id="authPopup">
-    <h3 class="authorization__modal_title">Авторизация</h3>
-    <div class="authorization__modal_block">
+    <div class="authorization__modal" id="authPopup">
+      <h3 class="authorization__modal_title">Авторизация</h3>
+      <div class="authorization__modal_block">
           <input type="text" placeholder="Введите имя" class="authorization__modal_input" id="name">
-            <input type="text" placeholder="Введите ник" class="authorization__modal_input" id="nickname">
-            <button class="authorization__modal_btn button-o" id="authBtn">Войти</button>
-  </div>
-</div> -->
+          <input type="text" placeholder="Введите ник" class="authorization__modal_input" id="nickname">
+          <button class="authorization__modal_btn button-o" id="authBtn">Войти</button>
+      </div>
+    </div>
 
     <div class="fileload__modal" id="fileLoadPopup">
     <h4 class="fileload__modal_title">Загрузка фото</h4>
@@ -75,9 +75,10 @@
   <li>
       <img id= "messagesPhoto" onchange= "sendImg()" src="" alt="" style="width:70px; height: 70px; border-radius: 70px; box-shadow: none">
       <span>{{date}}</span>
-      <span>{{username}}</span>
+      <span>{{userName}}</span>
       <span>{{content}}</span>
   </li>
   {{/each}}
-  </body>
+</script>
+</body>
 </html>
