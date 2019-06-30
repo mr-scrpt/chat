@@ -19,7 +19,16 @@ io.on('connection', function (socket) {
   console.log('до логина');
   socket.on('login', user => {
     console.log('внутри логина');
-    users.push(user);
+    let existing = false;
+    users.forEach(item=>{
+      if(item.userName === user.userName){
+        existing = true;
+      }
+    });
+    if (!existing){
+      users.push(user);
+    }
+
     console.log(users);
     io.emit('userUpdate', users);
 
