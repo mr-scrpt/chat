@@ -4,6 +4,7 @@ const http = require('http').Server(app);
 const io = require('socket.io')(http, {serveClient: true});
 
 let users = [];
+//let users = new Set();
 let connections = [];
 
 
@@ -15,10 +16,33 @@ app.get('/', function (req, res) {
 
 io.on('connection', function (socket) {
 
-  socket.emit('connected', 'a user connected');
+  console.log('до логина');
+  socket.on('login', user => {
+    console.log('внутри логина');
+    users.push(user);
+    console.log(users);
+    io.emit('userUpdate', users);
+
+
+    socket.on('disconnect', function () {
+
+      let pos = users.indexOf(user);
+      users.splice(pos, 1);
+      console.log('выход');
+      io.emit('userUpdate', users);
+      //io.emit('user disconnected');
+    });
+  });
+
+
+  socket.emit('connected');
+
+  
+
 
   socket.join('all');
   socket.on('msg', function (msg) {
+
     console.log(msg);
     const dataOptions = {
       timezone: 'UTC',
@@ -33,15 +57,19 @@ io.on('connection', function (socket) {
       userId: socket.id,
       userName: msg.name
     };
-    console.log(obj);
+    
     socket.emit('message', obj);
     socket.to('all').emit('message', obj);
   });
   socket.on('receiveHistory', ()=>{
     //localStorage
-  })
+    console.log('history');
+  });
+
 
 });
+
+
 // io.on('send mess', (data) => {
 //   io.socket.emit('new mess', messageData);
 // });

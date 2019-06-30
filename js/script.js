@@ -25,23 +25,34 @@ document.addEventListener('DOMContentLoaded', function() {
         messagesListOnPage = [],
         socket = io.connect('http://localhost:3000/');
 
-    socket.on('connected', function (msg) {
-        //socket.emit('receiveHistory');
-        console.log(msg, 2222);
-        const loginData = localStorage.getItem('login');
-        users.push({
-            name: JSON.parse(loginData).userName
-        });
+    function emitLogin(data){
+        if (data) {
+            socket.emit('login', data);
+            users.push({
+                name: data.userName
+            });
+        }
+    }
 
+    socket.on('connected', function (msg) {
+        checkLogin();
+        //socket.emit('receiveHistory');
+        const loginData = JSON.parse(localStorage.getItem('login'));
+        emitLogin(loginData);
+        socket.emit('userUpdate', loginData);
+    });
+
+    socket.on('userUpdate', (users)=>{
+        console.log('рендер юзеров');
+        console.log(users);
         let usersActiveList = renderUsers(users);
         console.log(usersList);
         usersList.innerHTML = usersActiveList;
-
     });
 
     function checkLogin() {
         const loginData = localStorage.getItem('login');
-        console.log('test here');
+
         if(loginData){
             authPopup.classList.add('hidden');
             messageForm.classList.remove('hidden');
@@ -49,55 +60,46 @@ document.addEventListener('DOMContentLoaded', function() {
 
         }else {
             messageForm.classList.add('hidden');
-            members.classList.add('hidden')
+            members.classList.add('hidden');
+
         }
     }
-
-
-    const loginEvent = new Event('loginEvent');
-    checkLogin();
-
-  //const userAvatar = JSON.parse(localStorage.getItem('login')).userAvatar;
-
     authBtn.addEventListener('click', e=>{
-    const userName = name.value;
-    const userNick = nickname.value;
-    if (userName && userNick){
-      const alertMessage = document.querySelector('.alertMessage');
-      if (alertMessage) {
-        alertMessage.parentNode.removeChild(alertMessage);
-      }
-      const data = {
-        'userName':userName,
-        'userNick': userNick,
-        'userAvatar': ''
-      };
-      localStorage.setItem('login', JSON.stringify(data));
+        const userName = name.value;
+        const userNick = nickname.value;
 
-      document.body.dispatchEvent(loginEvent);
+        if (userName && userNick){
+            const alertMessage = document.querySelector('.alertMessage');
+            if (alertMessage) {
+                alertMessage.parentNode.removeChild(alertMessage);
+            }
+            const data = {
+                'userName':userName,
+                'userNick': userNick,
+                'userAvatar': ''
+            };
+            localStorage.setItem('login', JSON.stringify(data));
+            checkLogin();
+            emitLogin(data);
 
-    } else {
-      const alertMessage = document.createElement('div');
-      alertMessage.classList.add('alertMessage');
-      alertMessage.innerText = 'Все поля обязательны';
-      authPopup.appendChild(alertMessage);
 
-    }
+
+
+        } else {
+            const alertMessage = document.createElement('div');
+            alertMessage.classList.add('alertMessage');
+            alertMessage.innerText = 'Все поля обязательны';
+            authPopup.appendChild(alertMessage);
+
+        }
     });
 
-    document.body.addEventListener('loginEvent', e=>{
-    checkLogin()
-    });
-
-
-
-    socket.on('message', addMessage);
 
     sendBtn.addEventListener('click', (event) => {
       event.preventDefault();
 
         const userNick = JSON.parse(localStorage.getItem('login')).userNick;
-        console.log(userNick);
+
         let messageInfo = {
             name: userNick.trim() + ':',
             message: messageText.value.trim()
@@ -113,11 +115,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     });
 
+    socket.on('message', addMessage);
     function addMessage(message){
-
-      messagesListOnPage.push(message);
-      console.log(messagesListOnPage);
-      let messagesList = renderMessages(messagesListOnPage);
+        messagesListOnPage.push(message);
+        console.log(messagesListOnPage);
+        let messagesList = renderMessages(messagesListOnPage);
             messages.innerHTML = messagesList;
             messageContainer.scrollTop = messageContainer.scrollHeight;
     }
