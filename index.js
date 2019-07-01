@@ -6,7 +6,7 @@ const io = require('socket.io')(http, {serveClient: true});
 let users = [];
 
 
-//let users = new Set();
+
 let connections = [];
 
 
@@ -17,34 +17,55 @@ app.get('/', function (req, res) {
 });
 
 io.on('connection', function (socket) {
+  socket.emit('connected', users);
+  //io.emit('connected', users);
 
+  socket.on('getUser', user =>{
+    console.log(user);
+    users.forEach(item=>{
+      if(item.userName === user){
+        item.online = true;
+      }
+    });
+
+    console.log(users);
+    socket.emit('sendUser', users);
+  });
 
   socket.on('login', user => {
     let existing = false;
+
+
     users.forEach(item=>{
       if(item.userName === user.userName){
         existing = true;
+        item.online = true;
       }
+
     });
     if (!existing){
       users.push(user);
     }
+
     io.emit('userUpdate', users);
 
 
+
     socket.on('disconnect', function () {
-      let pos = users.indexOf(user);
-      users.splice(pos, 1);
-      console.log('выход');
+      users.forEach(item=>{
+        if(item.userName === user.userName){
+          item.online = false;
+        }
+      });
       io.emit('userUpdate', users);
 
     });
   });
 
-  socket.emit('connected');
+
 
   
-
+  
 
   socket.join('all');
   socket.on('msg', function (msg) {
@@ -62,15 +83,12 @@ io.on('connection', function (socket) {
       userNick: msg.userNick
     };
 
-    /*users.forEach(user=>{
-      if (!user.history){
-          user.history = [];
-          user.history.push(obj);
-        } else {
-          user.history.push(obj);
-
+    users.forEach(user=>{
+      if(user.online){
+        user.userHistory.push(obj);
       }
-    });*/
+    });
+
 
 
 

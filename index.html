@@ -65,19 +65,23 @@
 <script src="js/script.js"></script>
 <script id="listOfUsers" type="text/x-handlebars-template">
     {{#each this}}
-    <li>
-        <span>{{userName}}</span>
-    </li>
+      {{#if online}}
+        <li>
+            <span>{{userName}}</span>
+        </li>
+      {{/if}}
     {{/each}}
 </script>
 <script id="messageList" type="text/x-handlebars-template">
   {{#each this}}
-  <li>
-      <img id= "messagesPhoto" onchange= "sendImg()" src="" alt="" style="width:70px; height: 70px; border-radius: 70px; box-shadow: none">
-      <span>{{date}}</span>
-      <span>{{userNick}}</span>
-      <span>{{content}}</span>
-  </li>
+
+    <li>
+        <img id= "messagesPhoto" onchange= "sendImg()" src="" alt="" style="width:70px; height: 70px; border-radius: 70px; box-shadow: none">
+        <span>{{date}}</span>
+        <span>{{userNick}}</span>
+        <span>{{content}}</span>
+    </li>
+
   {{/each}}
 </script>
 </body>
