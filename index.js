@@ -4,6 +4,8 @@ const http = require('http').Server(app);
 const io = require('socket.io')(http, {serveClient: true});
 
 let users = [];
+
+
 //let users = new Set();
 let connections = [];
 
@@ -16,9 +18,8 @@ app.get('/', function (req, res) {
 
 io.on('connection', function (socket) {
 
-  console.log('до логина');
+
   socket.on('login', user => {
-    console.log('внутри логина');
     let existing = false;
     users.forEach(item=>{
       if(item.userName === user.userName){
@@ -28,21 +29,17 @@ io.on('connection', function (socket) {
     if (!existing){
       users.push(user);
     }
-
-    console.log(users);
     io.emit('userUpdate', users);
 
 
     socket.on('disconnect', function () {
-
       let pos = users.indexOf(user);
       users.splice(pos, 1);
       console.log('выход');
       io.emit('userUpdate', users);
-      //io.emit('user disconnected');
+
     });
   });
-
 
   socket.emit('connected');
 
@@ -51,8 +48,6 @@ io.on('connection', function (socket) {
 
   socket.join('all');
   socket.on('msg', function (msg) {
-
-    console.log(msg);
     const dataOptions = {
       timezone: 'UTC',
       hour: 'numeric',
@@ -64,9 +59,21 @@ io.on('connection', function (socket) {
       date: new Date().toLocaleString("ru", dataOptions),
       content: msg.message,
       userId: socket.id,
-      userName: msg.name
+      userNick: msg.userNick
     };
-    
+
+    /*users.forEach(user=>{
+      if (!user.history){
+          user.history = [];
+          user.history.push(obj);
+        } else {
+          user.history.push(obj);
+
+      }
+    });*/
+
+
+
     socket.emit('message', obj);
     socket.to('all').emit('message', obj);
   });
@@ -77,6 +84,7 @@ io.on('connection', function (socket) {
 
 
 });
+
 
 
 // io.on('send mess', (data) => {

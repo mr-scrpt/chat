@@ -33,23 +33,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     }
-
-    socket.on('connected', function (msg) {
-        checkLogin();
-        //socket.emit('receiveHistory');
-        const loginData = JSON.parse(localStorage.getItem('login'));
-        emitLogin(loginData);
-        socket.emit('userUpdate', loginData);
-    });
-
-    socket.on('userUpdate', (users)=>{
-        console.log('рендер юзеров');
-        console.log(users);
-        let usersActiveList = renderUsers(users);
-        console.log(usersList);
-        usersList.innerHTML = usersActiveList;
-    });
-
     function checkLogin() {
         const loginData = localStorage.getItem('login');
 
@@ -58,12 +41,45 @@ document.addEventListener('DOMContentLoaded', function() {
             messageForm.classList.remove('hidden');
             members.classList.remove('hidden');
 
+            checkHistory();
+
         }else {
             messageForm.classList.add('hidden');
             members.classList.add('hidden');
 
         }
     }
+
+    function checkHistory(){
+        const loginData = JSON.parse(localStorage.getItem('login'));
+
+        if(loginData.userHistory.length > 0){
+            messagesListOnPage = [...loginData.userHistory];
+
+            let messagesList = renderMessages(messagesListOnPage);
+            messages.innerHTML = messagesList;
+            messageContainer.scrollTop = messageContainer.scrollHeight;
+        }
+    }
+
+
+    socket.on('connected', function (users) {
+        checkLogin();
+
+        const loginData = JSON.parse(localStorage.getItem('login'));
+
+        emitLogin(loginData);
+
+
+    });
+
+    socket.on('userUpdate', (users)=>{
+        let usersActiveList = renderUsers(users);
+        usersList.innerHTML = usersActiveList;
+    });
+
+
+
     authBtn.addEventListener('click', e=>{
         const userName = name.value;
         const userNick = nickname.value;
@@ -76,14 +92,16 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = {
                 'userName':userName,
                 'userNick': userNick,
-                'userAvatar': ''
+                'userAva': '',
+                'userHistory': []
             };
             localStorage.setItem('login', JSON.stringify(data));
             checkLogin();
             emitLogin(data);
 
-
-
+            // if(!localStorage.getItem('userdata')){
+            //     localStorage.setItem('userdata', JSON.stringify({'userAvatar': '', userHistory: []}));
+            // }
 
         } else {
             const alertMessage = document.createElement('div');
@@ -96,12 +114,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     sendBtn.addEventListener('click', (event) => {
+
       event.preventDefault();
 
         const userNick = JSON.parse(localStorage.getItem('login')).userNick;
 
         let messageInfo = {
-            name: userNick.trim() + ':',
+            userNick: userNick.trim() + ':',
             message: messageText.value.trim()
         };
 
@@ -116,9 +135,14 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     socket.on('message', addMessage);
+
     function addMessage(message){
+
+        const user = JSON.parse(localStorage.getItem('login'));
+        user.userHistory.push(message);
+        localStorage.setItem('login', JSON.stringify(user));
         messagesListOnPage.push(message);
-        console.log(messagesListOnPage);
+
         let messagesList = renderMessages(messagesListOnPage);
             messages.innerHTML = messagesList;
             messageContainer.scrollTop = messageContainer.scrollHeight;
