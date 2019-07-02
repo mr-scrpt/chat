@@ -14,6 +14,8 @@ document.addEventListener('DOMContentLoaded', function() {
         container = document.querySelector('.container'),
         nameOfuser = document.querySelector('.users__block_name'),
         members = document.querySelector('.users__block_members'),
+        usersBlockTitle = document.querySelector('.users__block_title'),
+        countMembers = document.querySelector('.countMembers');
         usersList = document.querySelector('#usersList'),
         messagesPhoto = document.querySelector('#messagesPhoto'),
         templateOfMessage = document.querySelector('#messageList').textContent,
@@ -22,6 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
         renderUsers = Handlebars.compile(templateOfUsers),
         renderMessages = Handlebars.compile(templateOfMessage),
         usersServer = [],
+        usersServerOnline = [],
         userCurrent = {},
         messagesListOnPage = [],
         socket = io.connect('http://localhost:3000/');
@@ -29,27 +32,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     function checkLogin(users) {
-
+        console.log('test here');
         const loginData = JSON.parse(localStorage.getItem('login'));
 
         if(loginData){
-            authPopup.classList.add('hidden');
-            messageForm.classList.remove('hidden');
-            members.classList.remove('hidden');
 
             userCurrent = loginData;
-            userNick = loginData.userNick;
+            userNick = userCurrent.userNick;
             socket.emit('loginUser', loginData);
 
-
             if (users.length > 0){
-                renderHistory(users, loginData);
+                renderHistory(users, userCurrent);
             }
+            renderUserHtml(userCurrent);
 
-
-        }else {
-            messageForm.classList.add('hidden');
-            members.classList.add('hidden');
         }
     }
 
@@ -71,8 +67,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     socket.on('updUsers', users=>{
         usersServer = users;
-        let usersActiveList = renderUsers(usersServer);
+        usersServerOnline = [];
+        users.forEach(item=>{
+            if (item.online === true){
+                usersServerOnline.push(item);
+            }
+        });
+        let usersActiveList = renderUsers(usersServerOnline);
         usersList.innerHTML = usersActiveList;
+        countUsersHtml(usersServerOnline);
     });
 
 
@@ -144,5 +147,25 @@ document.addEventListener('DOMContentLoaded', function() {
             messageContainer.scrollTop = messageContainer.scrollHeight;
     }
 
+    function renderUserHtml(user = false) {
+        if (user){
+            authPopup.classList.add('hidden');
+            messageForm.classList.remove('hidden');
+            members.classList.remove('hidden');
+            nameOfuser.innerText = user.userNick;
+            let logUot = document.createElement('button');
+            logUot.classList.add('logout');
+            logUot.innerText = 'Выйти';
+            usersBlockTitle.appendChild(logUot);
+            logUot.addEventListener('click', ()=>{
+                localStorage.removeItem('login');
+                document.location.reload();
+
+            })
+        }
+    }
+    function countUsersHtml() {
+        countMembers.innerText =`(${usersServerOnline.length})`;
+    }
 
 });
