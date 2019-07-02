@@ -6,10 +6,6 @@ const io = require('socket.io')(http, {serveClient: true});
 let users = [];
 
 
-
-let connections = [];
-
-
 app.use(express.static(__dirname));
 //указываем корневую деректорию
 app.get('/', function (req, res) {
@@ -17,58 +13,46 @@ app.get('/', function (req, res) {
 });
 
 io.on('connection', function (socket) {
+
+
   socket.emit('connected', users);
-  //io.emit('connected', users);
 
-  socket.on('getUser', user =>{
-    console.log(user);
-    users.forEach(item=>{
-      if(item.userName === user){
-        item.online = true;
-      }
-    });
 
-    console.log(users);
-    socket.emit('sendUser', users);
-  });
-
-  socket.on('login', user => {
+  socket.on('loginUser', user => {
     let existing = false;
-
 
     users.forEach(item=>{
       if(item.userName === user.userName){
         existing = true;
         item.online = true;
       }
-
     });
+
     if (!existing){
       users.push(user);
     }
-
-    io.emit('userUpdate', users);
-
-
+    io.emit('updUsers', users);
 
     socket.on('disconnect', function () {
       users.forEach(item=>{
+
         if(item.userName === user.userName){
           item.online = false;
         }
       });
-      io.emit('userUpdate', users);
-
+      io.emit('updUsers', users);
     });
+
   });
 
-
-
-  
   
 
   socket.join('all');
   socket.on('msg', function (msg) {
+
+    console.log(users);
+
+
     const dataOptions = {
       timezone: 'UTC',
       hour: 'numeric',
@@ -84,31 +68,22 @@ io.on('connection', function (socket) {
     };
 
     users.forEach(user=>{
+      console.log(user);
       if(user.online){
+        if(!user.userHistory){
+          user.userHistory = []
+        }
         user.userHistory.push(obj);
       }
     });
 
-
-
-
     socket.emit('message', obj);
     socket.to('all').emit('message', obj);
   });
-  socket.on('receiveHistory', ()=>{
-    //localStorage
-    console.log('history');
-  });
-
 
 });
 
 
-
-// io.on('send mess', (data) => {
-//   io.socket.emit('new mess', messageData);
-// });
-//localhost:3000
 http.listen(3000, function () {
   console.log('listening on *:3000');
 });
