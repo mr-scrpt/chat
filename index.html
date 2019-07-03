@@ -14,10 +14,11 @@
         <div class="users">
           <div class="users__block">
             <div class="users__block_title">
-              <div class="users__block_img" id="loadPhoto">
-                <img class="users__block_image" src="" id="avatarImage">
+              <label class="users__block_img" id="loadPhoto" for="userPhoto">
+                <img class="users__block_image hidden" src="" id="avatarImage">
                 <span class="no_photo">No photo</span>
-              </div>
+              </label>
+              <input type="file" id="userPhoto" class="hidden">
               <h3 class="users__block_name">Добро пожаловать!</h3>
             </div>
             <h4 class="users__block_members hidden">Участники <span class="countMembers"></span></h4>
@@ -73,7 +74,7 @@
   {{#each this}}
 
     <li>
-        <img id= "messagesPhoto" onchange= "sendImg()" src="" alt="" style="width:70px; height: 70px; border-radius: 70px; box-shadow: none">
+        <img id= "messagesPhoto" onchange= "sendImg()" src="" alt="" class="ava_{{userNick}}" style="width:70px; height: 70px; border-radius: 70px; box-shadow: none">
         <span>{{date}}</span>
         <span>{{userNick}}</span>
         <span>{{content}}</span>

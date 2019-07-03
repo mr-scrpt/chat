@@ -21,18 +21,22 @@ document.addEventListener('DOMContentLoaded', function() {
         templateOfMessage = document.querySelector('#messageList').textContent,
         templateOfUsers = document.querySelector('#listOfUsers').textContent,
         messageForm = document.querySelector('.message__form'),
+        userPhoto = document.querySelector('#userPhoto'),
+        avatarImage = document.querySelector('#avatarImage'),
+        noPhoto = document.querySelector('.no_photo'),
         renderUsers = Handlebars.compile(templateOfUsers),
         renderMessages = Handlebars.compile(templateOfMessage),
         usersServer = [],
         usersServerOnline = [],
         userCurrent = {},
         messagesListOnPage = [],
-        socket = io.connect('http://localhost:3000/');
+        socket = io.connect('http://localhost:3000/'),
+        fileReader = new FileReader();
+
 
 
 
     function checkLogin(users) {
-        console.log('test here');
         const loginData = JSON.parse(localStorage.getItem('login'));
 
         if(loginData){
@@ -45,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 renderHistory(users, userCurrent);
             }
             renderUserHtml(userCurrent);
-
+            avatarImage.classList.add(`ava_${userCurrent.userNick}`)
         }
     }
 
@@ -72,10 +76,39 @@ document.addEventListener('DOMContentLoaded', function() {
             if (item.online === true){
                 usersServerOnline.push(item);
             }
+
         });
         let usersActiveList = renderUsers(usersServerOnline);
         usersList.innerHTML = usersActiveList;
         countUsersHtml(usersServerOnline);
+    });
+
+    socket.on('updAva', users=>{
+        usersServer = users;
+
+        usersServer.forEach(item=>{
+            console.log(item);
+            if(item.userAvatar){
+                const images = document.querySelectorAll(`.ava_${item.userNick}`);
+                if(images){
+                    images.forEach(image=>{
+                        image.src = item.userAvatar;
+                    })
+                }
+                if(item.userNick === userCurrent.userNick){
+                    userCurrent.userAvatar = item.userAvatar;
+                }
+            }
+        });
+        if (userCurrent.userAvatar){
+            if (avatarImage.classList.contains('hidden')){
+                avatarImage.classList.remove('hidden')
+            }
+            if (!noPhoto.classList.contains('hidden')){
+                noPhoto.classList.add('hidden')
+            }
+        }
+
     });
 
 
@@ -83,6 +116,27 @@ document.addEventListener('DOMContentLoaded', function() {
         usersServer = users;
         checkLogin(usersServer);
 
+    });
+
+
+    userPhoto.addEventListener('change', e=>{
+        const [avatar] = e.target.files;
+        if (avatar){
+            if (avatar.size > 300 * 1024){
+                alert(`Файл слишком большой: ${avatar.size}`)
+            } else {
+                fileReader.readAsDataURL(avatar);
+            }
+        }
+    });
+    fileReader.addEventListener('load', e => {
+        socket.emit('loadAvatar', fileReader.result, userCurrent);
+        if (avatarImage.classList.contains('hidden')){
+            avatarImage.classList.remove('hidden')
+        }
+        if (!noPhoto.classList.contains('hidden')){
+            noPhoto.classList.add('hidden')
+        }
     });
 
     authBtn.addEventListener('click', e=>{

@@ -16,7 +16,7 @@ io.on('connection', function (socket) {
 
 
   socket.emit('connected', users);
-
+  console.log(users);
 
   socket.on('loginUser', user => {
     let existing = false;
@@ -31,7 +31,9 @@ io.on('connection', function (socket) {
     if (!existing){
       users.push(user);
     }
+
     io.emit('updUsers', users);
+    io.emit('updAva', users);
 
     socket.on('disconnect', function () {
       users.forEach(item=>{
@@ -45,13 +47,25 @@ io.on('connection', function (socket) {
 
   });
 
-  
+  socket.on('loadAvatar', (file, user) =>{
+    let changeAva = false;
+
+    users.forEach(item=>{
+      if(item.userNick === user.userNick){
+        item.userAvatar = file;
+        changeAva = true;
+      }
+    });
+
+    if (changeAva === true){
+      io.emit('updAva', users);
+    }
+
+
+  });
 
   socket.join('all');
   socket.on('msg', function (msg) {
-
-    console.log(users);
-
 
     const dataOptions = {
       timezone: 'UTC',
@@ -59,16 +73,22 @@ io.on('connection', function (socket) {
       minute: 'numeric',
       second: 'numeric'
     };
+    /*let userAvatar = '';
+    users.forEach(item=>{
+      if (msg.userNick == item.userNick){
+        userAvatar = item.userAvatar;
+      }
+    });*/
 
     const obj = {
       date: new Date().toLocaleString("ru", dataOptions),
       content: msg.message,
       userId: socket.id,
       userNick: msg.userNick
+
     };
 
     users.forEach(user=>{
-      console.log(user);
       if(user.online){
         if(!user.userHistory){
           user.userHistory = []
@@ -79,6 +99,7 @@ io.on('connection', function (socket) {
 
     socket.emit('message', obj);
     socket.to('all').emit('message', obj);
+    io.emit('updAva', users);
   });
 
 });

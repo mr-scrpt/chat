@@ -249,17 +249,12 @@ body {
   margin-right: 10px;
 }
 .users__block_image {
-  display: none;
-  width: 0;
-  height: 0;
-}
-.users__block_image-add  {
-  display: block;
   width: 70px;
   height: 70px;
   border-radius: 70px;
   box-shadow: none;
 }
+
 .no_photo-o {
   display: none;
 }
