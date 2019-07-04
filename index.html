@@ -14,11 +14,11 @@
         <div class="users">
           <div class="users__block">
             <div class="users__block_title">
-              <label class="users__block_img" id="loadPhoto" for="userPhoto">
+              <div class="users__block_img" id="loadPhoto">
                 <img class="users__block_image hidden" src="" id="avatarImage">
                 <span class="no_photo">No photo</span>
-              </label>
-              <input type="file" id="userPhoto" class="hidden">
+              </div>
+<!--              <input type="file" id="userPhoto" class="hidden">-->
               <h3 class="users__block_name">Добро пожаловать!</h3>
             </div>
             <h4 class="users__block_members hidden">Участники <span class="countMembers"></span></h4>
@@ -47,17 +47,17 @@
       </div>
     </div>
 
-    <div class="fileload__modal" id="fileLoadPopup">
+    <div class="fileload__modal hidden" id="fileLoadPopup">
     <h4 class="fileload__modal_title">Загрузка фото</h4>
     <div class="fileload__modal_block">
       <div class="droparea">
         <input type="file" name= "file" id="inputFile" accept="image/*" data-title="Перетащите сюда файл" class="fileload__modal_input">
-        <img src="" id="image" class="image_input">
+        <img src="" id="image" class="imageEditor hidden">
         <label for="inputFile" id='drop-area'></label>
       </div>
         <div class="fileload__modal_buttons">
             <button class="button-o" id="cancel">Отмена</button>
-            <button class="button-o" id="sendPhoto">Загрузить</button>
+            <button class="button-o" id="sendPhoto" disabled>Загрузить</button>
         </div>
     </div>
 </div>

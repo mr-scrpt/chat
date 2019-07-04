@@ -16,7 +16,6 @@ io.on('connection', function (socket) {
 
 
   socket.emit('connected', users);
-  console.log(users);
 
   socket.on('loginUser', user => {
     let existing = false;
@@ -100,6 +99,8 @@ io.on('connection', function (socket) {
     socket.emit('message', obj);
     socket.to('all').emit('message', obj);
     io.emit('updAva', users);
+
+
   });
 
 });

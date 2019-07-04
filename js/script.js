@@ -21,9 +21,13 @@ document.addEventListener('DOMContentLoaded', function() {
         templateOfMessage = document.querySelector('#messageList').textContent,
         templateOfUsers = document.querySelector('#listOfUsers').textContent,
         messageForm = document.querySelector('.message__form'),
-        userPhoto = document.querySelector('#userPhoto'),
+        usersBlockImg = document.querySelector('.users__block_img'),
+        userPhoto = document.querySelector('.fileload__modal_input'),
+        droparea = document.querySelector('.droparea'),
         avatarImage = document.querySelector('#avatarImage'),
+        imageEditor =document.querySelector('.imageEditor'),
         noPhoto = document.querySelector('.no_photo'),
+        fileloadModal = document.querySelector('.fileload__modal'),
         renderUsers = Handlebars.compile(templateOfUsers),
         renderMessages = Handlebars.compile(templateOfMessage),
         usersServer = [],
@@ -85,9 +89,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     socket.on('updAva', users=>{
         usersServer = users;
-
+        console.log('test here');
         usersServer.forEach(item=>{
-            console.log(item);
+
             if(item.userAvatar){
                 const images = document.querySelectorAll(`.ava_${item.userNick}`);
                 if(images){
@@ -100,6 +104,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         });
+
         if (userCurrent.userAvatar){
             if (avatarImage.classList.contains('hidden')){
                 avatarImage.classList.remove('hidden')
@@ -118,6 +123,39 @@ document.addEventListener('DOMContentLoaded', function() {
 
     });
 
+    //Drag and Drop
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        droparea.addEventListener(eventName, preventDefaults, false)
+    });
+    function preventDefaults (e) {
+        e.preventDefault();
+        e.stopPropagation();
+    };
+
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        droparea.addEventListener(eventName, highlight, false)
+    });
+    ['dragleave', 'drop'].forEach(eventName => {
+        droparea.addEventListener(eventName, unhighlight, false)
+    });
+    function highlight(e) {
+        droparea.classList.add('highlight')
+    }
+    function unhighlight(e) {
+        droparea.classList.remove('highlight')
+    }
+    droparea.addEventListener('drop', handleDrop, false);
+    function handleDrop(e) {
+        let dt = e.dataTransfer;
+        let [file] = dt.files;
+        if (file.size > 300 * 1024){
+            alert(`Файл слишком большой: ${file.size}`)
+        } else {
+            fileReader.readAsDataURL(file);
+        }
+    }
+
 
     userPhoto.addEventListener('change', e=>{
         const [avatar] = e.target.files;
@@ -129,14 +167,46 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
+
+
     fileReader.addEventListener('load', e => {
+
+        sendPhoto.removeAttribute('disabled');
+        imageEditor.classList.remove('hidden');
+        imageEditor.src = fileReader.result;
+
+    });
+
+    sendPhoto.addEventListener('click', e=>{
         socket.emit('loadAvatar', fileReader.result, userCurrent);
+        fileloadModal.classList.add('hidden');
         if (avatarImage.classList.contains('hidden')){
             avatarImage.classList.remove('hidden')
         }
         if (!noPhoto.classList.contains('hidden')){
             noPhoto.classList.add('hidden')
         }
+    });
+
+    usersBlockImg.addEventListener('click', e=>{
+        if (fileloadModal.classList.contains('hidden')){
+            fileloadModal.classList.remove('hidden');
+        }else {
+            fileloadModal.classList.add('hidden')
+        }
+
+        imageEditor.classList.add(`ava_${userCurrent.userNick}`);
+
+
+        console.log(imageEditor.attributes.src.value);
+        if(userCurrent.userAvatar){
+            imageEditor.src = userCurrent.userAvatar;
+            imageEditor.classList.remove('hidden')
+        }
+    });
+
+    cancel.addEventListener('click', e=>{
+        fileloadModal.classList.add('hidden')
     });
 
     authBtn.addEventListener('click', e=>{
@@ -207,15 +277,19 @@ document.addEventListener('DOMContentLoaded', function() {
             messageForm.classList.remove('hidden');
             members.classList.remove('hidden');
             nameOfuser.innerText = user.userNick;
-            let logUot = document.createElement('button');
-            logUot.classList.add('logout');
-            logUot.innerText = 'Выйти';
-            usersBlockTitle.appendChild(logUot);
-            logUot.addEventListener('click', ()=>{
-                localStorage.removeItem('login');
-                document.location.reload();
 
-            })
+            if(!document.querySelector('.logout')){
+                let logUot = document.createElement('button');
+                logUot.classList.add('logout');
+                logUot.innerText = 'Выйти';
+                usersBlockTitle.appendChild(logUot);
+                logUot.addEventListener('click', ()=>{
+                    localStorage.removeItem('login');
+                    document.location.reload();
+
+                })
+            }
+
         }
     }
     function countUsersHtml() {

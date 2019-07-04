@@ -76,7 +76,13 @@ body {
   font-size: 13px;
   cursor: pointer;
 }
-
+.button-o:disabled{
+  background: red;
+  cursor: no-drop;
+}
+.button-o:disabled:hover{
+  background: #ccc;
+}
 .button-o:hover {
   background-color: #e76228;
 }
@@ -168,7 +174,7 @@ body {
 }
 
 .fileload__modal {
-  display: none;
+
   position: absolute;
   top: 0;
   left: 35%;
@@ -211,7 +217,9 @@ body {
   border-radius: 10px;
   color: #909090;
 }
-
+.droparea.highlight{
+  border-color: rebeccapurple;
+}
 .fileload__modal_input::before {
   content: attr(data-title);
   display: inline-block;
@@ -258,13 +266,12 @@ body {
 .no_photo-o {
   display: none;
 }
-.image_input {
- display: none;
-}
-.image_input-add {
+
+.imageEditor{
   display: block;
   width: 144px;
   height: 144px;
+  margin: auto;
 }
 
 .message__list {
