@@ -31,6 +31,7 @@ io.on('connection', function (socket) {
       users.push(user);
     }
 
+
     io.emit('updUsers', users);
     io.emit('updAva', users);
 
@@ -72,12 +73,7 @@ io.on('connection', function (socket) {
       minute: 'numeric',
       second: 'numeric'
     };
-    /*let userAvatar = '';
-    users.forEach(item=>{
-      if (msg.userNick == item.userNick){
-        userAvatar = item.userAvatar;
-      }
-    });*/
+
 
     const obj = {
       date: new Date().toLocaleString("ru", dataOptions),
